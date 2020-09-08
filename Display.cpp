@@ -19,6 +19,7 @@ Dimension Display::size() const
   return { Width, Height };
 }
 
+//Draws a line
 void Display::draw(const Point point,
  const uint16_t *pixels,
  const uint16_t width)

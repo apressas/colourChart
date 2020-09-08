@@ -67,39 +67,49 @@ int main()
 
     uint16_t colour_tl = 0x0000; //red
     uint16_t colour_tr = 0x000f; //blue
+    uint16_t colour_bl = 0x000f;
+    uint16_t colour_br = 0x0000;
 
     //Convert colour to struct
     Colour top_left, top_right, bottom_left, bottom_right;
 
     break_into_components(colour_tl, &top_left);
     break_into_components(colour_tr, &top_right);
+    break_into_components(colour_bl, &bottom_left);
+    break_into_components(colour_br, &bottom_right);
 
     uint16_t PixelArray[100]; //TODO change this to vector
     //uint16_t* pPixelArray = &PixelArray[0];
 
     Dimension displaySize = display->size();
 
-    Colour pixelColour = top_left;
-    //make a row
-    for (auto i = 0; i < displaySize.width; i++)
-    {
-        //reconstruct in rgb565 format
-        PixelArray[i] = (pixelColour.red_component << 11) | (pixelColour.green_component << 5) | (pixelColour.blue_component);
-
-        pixelColour = mix_colours(pixelColour, top_right, 1);
-
-        //PixelArray[i] = PixelArray[i] | (pixelColour.green_component << 5);
-        //PixelArray[i] = PixelArray[i] | (pixelColour.blue_component << 3);
-
-        //*pPixelArray = i;
-        //pPixelArray++;
-    }
-
+    Colour horizontalColour = top_left;
+    Colour verticalColour = top_left;
+    
     //draw on all rows of the display
     for (auto i = 0; i < displaySize.height; i++)
     {
+        //make first row
+        for (auto i = 0; i < displaySize.width; i++)
+        {
+            //reconstruct in rgb565 format
+            PixelArray[i] = (horizontalColour.red_component << 11) | (horizontalColour.green_component << 5) | (horizontalColour.blue_component);
+
+            horizontalColour = mix_colours(horizontalColour, top_right, 1); //TODO calculate step automatically
+            
+            //PixelArray[i] = PixelArray[i] | (pixelColour.green_component << 5);
+            //PixelArray[i] = PixelArray[i] | (pixelColour.blue_component << 3);
+
+            //*pPixelArray = i;
+            //pPixelArray++;
+        }
+                
         display->draw(starting_point, PixelArray, displaySize.width);
-        if (starting_point.y<displaySize.height) starting_point.y++;
+        
+        if (starting_point.y<displaySize.height) starting_point.y++; //FIXME
+
+        verticalColour = mix_colours(verticalColour, bottom_left, 1);
+        horizontalColour = verticalColour;
     }
 
     display->present();
